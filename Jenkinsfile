@@ -5,34 +5,19 @@ pipeline {
 
     stages {
 
-        stage('Checkout Code') {
-            steps {
-                checkout scm
-            }
-        }
-
         stage('Verify Agent') {
             steps {
                 sh '''
-                    echo "Hostname:"
-                    hostname
-
-                    echo "User:"
-                    whoami
-
-                    echo "Java version:"
-                    java -version || true
-
-                    echo "Node version:"
-                    node -v
-
-                    echo "NPM version:"
-                    npm -v
+                  hostname
+                  whoami
+                  java -version
+                  node -v
+                  npm -v
                 '''
             }
         }
 
-        stage('Install Backend Dependencies') {
+        stage('Install Backend') {
             steps {
                 dir('backend') {
                     sh 'npm install'
@@ -40,27 +25,18 @@ pipeline {
             }
         }
 
-        stage('Run Backend App') {
+        stage('Run App') {
             steps {
                 dir('backend') {
                     sh '''
-                        echo "Stopping old node process (if any)"
-                        pkill -f server.js || true
+                      echo "Stopping old server if running"
+                      pkill -f server.js || true
 
-                        echo "Starting app on port 5000"
-                        nohup node server.js > app.log 2>&1 &
+                      echo "Starting server in background"
+                      nohup node server.js > app.log 2>&1 &
                     '''
                 }
             }
-        }
-    }
-
-    post {
-        success {
-            echo "✅ Deployment successful. App running on port 5000"
-        }
-        failure {
-            echo "❌ Deployment failed. Check logs."
         }
     }
 }
