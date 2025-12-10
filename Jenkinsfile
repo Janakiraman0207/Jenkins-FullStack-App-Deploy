@@ -1,16 +1,38 @@
 pipeline {
-    agent { label 'ec2-agent' }
+    agent {
+        label 'ec2-agent'
+    }
 
     stages {
-        stage('Verify Agent') {
+
+        stage('Checkout Code') {
             steps {
-                sh 'hostname'
-                sh 'whoami'
-                sh 'java -version'
+                checkout scm
             }
         }
 
-        stage('Install Backend') {
+        stage('Verify Agent') {
+            steps {
+                sh '''
+                    echo "Hostname:"
+                    hostname
+
+                    echo "User:"
+                    whoami
+
+                    echo "Java version:"
+                    java -version || true
+
+                    echo "Node version:"
+                    node -v
+
+                    echo "NPM version:"
+                    npm -v
+                '''
+            }
+        }
+
+        stage('Install Backend Dependencies') {
             steps {
                 dir('backend') {
                     sh 'npm install'
@@ -18,13 +40,27 @@ pipeline {
             }
         }
 
-        stage('Run App') {
+        stage('Run Backend App') {
             steps {
                 dir('backend') {
-                    sh 'pkill node || true'
-                    sh 'nohup node server.js > app.log 2>&1 &'
+                    sh '''
+                        echo "Stopping old node process (if any)"
+                        pkill -f server.js || true
+
+                        echo "Starting app on port 5000"
+                        nohup node server.js > app.log 2>&1 &
+                    '''
                 }
             }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployment successful. App running on port 5000"
+        }
+        failure {
+            echo "❌ Deployment failed. Check logs."
         }
     }
 }
