@@ -1,7 +1,8 @@
-
 pipeline {
     agent any
+
     stages {
+
         stage('Install') {
             steps {
                 dir('backend') {
@@ -9,6 +10,7 @@ pipeline {
                 }
             }
         }
+
         stage('Run App') {
             steps {
                 dir('backend') {
@@ -17,5 +19,6 @@ pipeline {
                 }
             }
         }
+
     }
 }
