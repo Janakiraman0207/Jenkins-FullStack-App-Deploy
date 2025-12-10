@@ -1,9 +1,16 @@
 pipeline {
-    agent any
+    agent { label 'ec2-agent' }
 
     stages {
+        stage('Verify Agent') {
+            steps {
+                sh 'hostname'
+                sh 'whoami'
+                sh 'java -version'
+            }
+        }
 
-        stage('Install') {
+        stage('Install Backend') {
             steps {
                 dir('backend') {
                     sh 'npm install'
@@ -19,6 +26,5 @@ pipeline {
                 }
             }
         }
-
     }
 }
