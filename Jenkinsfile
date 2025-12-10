@@ -1,18 +1,15 @@
 pipeline {
-    agent {
-        label 'ec2-agent'
-    }
+    agent { label 'ec2-agent' }
 
     stages {
 
         stage('Verify Agent') {
             steps {
                 sh '''
-                  hostname
-                  whoami
-                  java -version
-                  node -v
-                  npm -v
+                hostname
+                whoami
+                node -v
+                npm -v
                 '''
             }
         }
@@ -29,11 +26,8 @@ pipeline {
             steps {
                 dir('backend') {
                     sh '''
-                      echo "Stopping old server if running"
-                      pkill -f server.js || true
-
-                      echo "Starting server in background"
-                      nohup node server.js > app.log 2>&1 &
+                    pkill node || true
+                    nohup node server.js > app.log 2>&1 &
                     '''
                 }
             }
